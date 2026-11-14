@@ -1,13 +1,8 @@
 <div align="center">
 
-# 🚌 Mumbai Passenger Mobility Intelligence System
+# Mumbai Passenger Mobility Intelligence System
 
 **Scheduled bus journey planning, accessibility & inclusive-mobility analytics for Mumbai - built only on open data.**
-
-![Python](https://img.shields.io/badge/Python-3.11%20|%203.12-3F7C85?style=flat-square)
-![Streamlit](https://img.shields.io/badge/App-Streamlit-7FA38F?style=flat-square)
-![Data](https://img.shields.io/badge/Data-GTFS%20%C2%B7%20OSM%20%C2%B7%20Census-B8795A?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-41596E?style=flat-square)
 
 </div>
 
@@ -38,11 +33,11 @@ Processed data is included, so the app starts immediately. To rebuild everything
 ## What it does
 | Module | Highlights |
 |---|---|
-| 🧭 **Journey Explorer** | Choose origin, destination, date and time → up to 6 scheduled options with transfers, walking and waiting, a **door-to-door time summary**, an **indicative BEST fare range** and a route map. "Where can I reach in 15-90 min?" map. **Nearest bus stops** tool (click the map, type coordinates or pick a place → distance, walk time, routes, next departures). Engine: RAPTOR over 99,080 scheduled trips with real GTFS calendar logic, including after-midnight trips. |
-| ♿ **Accessibility & Inclusion** | Population-weighted stop access at 300 / 500 / 800 m (100 m grid, 12.44 M residents), peak service level, SC/ST and slum-cluster equity, access to colleges and health facilities (with explicit coordinate-uncertainty handling), 09:00 travel-time reach from every prabhag. |
-| 🚌 **Routes & Schedules** | 603 active routes: stops on a map, per-trip stop times, hourly timetables, peak headway; stop departure board; service availability by date. |
-| 🕸️ **Network Intelligence** | NetworkX components / cut vertices / betweenness; k-means typologies of stops, routes and prabhags; Connectivity Index with sensitivity analysis; Moran's I hotspots; **suggested new-stop catchments**; number-backed recommendations; CSV downloads. |
-| 📖 **How to use / Methods** | In-app guide and glossary; sources, GTFS quality audit, methodology and limitations. |
+| **Journey Explorer** | Choose origin, destination, date and time → up to 6 scheduled options with transfers, walking and waiting, a **door-to-door time summary**, an **indicative BEST fare range** and a route map. "Where can I reach in 15-90 min?" map. **Nearest bus stops** tool (click the map, type coordinates or pick a place → distance, walk time, routes, next departures). Engine: RAPTOR over 99,080 scheduled trips with real GTFS calendar logic, including after-midnight trips. |
+| **Accessibility & Inclusion** | Population-weighted stop access at 300 / 500 / 800 m (100 m grid, 12.44 M residents), peak service level, SC/ST and slum-cluster equity, access to colleges and health facilities (with explicit coordinate-uncertainty handling), 09:00 travel-time reach from every prabhag. |
+| **Routes & Schedules** | 603 active routes: stops on a map, per-trip stop times, hourly timetables, peak headway; stop departure board; service availability by date. |
+| **Network Intelligence** | NetworkX components / cut vertices / betweenness; k-means typologies of stops, routes and prabhags; Connectivity Index with sensitivity analysis; Moran's I hotspots; **suggested new-stop catchments**; number-backed recommendations; CSV downloads. |
+| **How to use / Methods** | In-app guide and glossary; sources, GTFS quality audit, methodology and limitations. |
 
 ## Headline results (Greater Mumbai, bus network)
 - **90.5%** of residents are within 500 m of a bus stop (77.4% within 300 m, 95.4% within 800 m); **~1.18 million** have none within 500 m.
