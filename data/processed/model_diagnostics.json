@@ -1,0 +1,320 @@
+{
+  "network": {
+    "isolated_component_agencies": {
+      "VVMT": 55
+    },
+    "nodes": 7506,
+    "edges": 24335,
+    "components_bus_only": 7,
+    "components_with_interchange": 2,
+    "largest_component_share": 0.9927,
+    "small_components": 0,
+    "cut_vertices": 97
+  },
+  "stop_clustering": {
+    "k": 3,
+    "selection": {
+      "3": {
+        "silhouette": 0.309,
+        "davies_bouldin": 1.101
+      },
+      "4": {
+        "silhouette": 0.251,
+        "davies_bouldin": 1.209
+      },
+      "5": {
+        "silhouette": 0.258,
+        "davies_bouldin": 1.102
+      },
+      "6": {
+        "silhouette": 0.234,
+        "davies_bouldin": 1.2
+      },
+      "7": {
+        "silhouette": 0.231,
+        "davies_bouldin": 1.119
+      }
+    },
+    "n": 4346,
+    "features": [
+      "n_routes",
+      "departures_day",
+      "departures_peak_h",
+      "degree",
+      "betweenness",
+      "stops_within_500"
+    ],
+    "profile": {
+      "Local stops": {
+        "n_routes": 1.67,
+        "departures_day": 147.44,
+        "degree": 4.56,
+        "betweenness": 0.0
+      },
+      "Major hubs": {
+        "n_routes": 13.84,
+        "departures_day": 1350.29,
+        "degree": 6.7,
+        "betweenness": 0.1
+      },
+      "Trunk-corridor stops": {
+        "n_routes": 8.37,
+        "departures_day": 817.79,
+        "degree": 5.82,
+        "betweenness": 0.01
+      }
+    },
+    "sizes": {
+      "Local stops": 2216,
+      "Trunk-corridor stops": 1967,
+      "Major hubs": 163
+    },
+    "note": "log1p + z-score; k chosen by silhouette over k=3..7"
+  },
+  "route_clustering": {
+    "speed_quality": {
+      "routes_with_speed": 603,
+      "implausible_speed_routes": 78
+    },
+    "k": 5,
+    "selection": {
+      "3": {
+        "silhouette": 0.324,
+        "davies_bouldin": 0.989
+      },
+      "4": {
+        "silhouette": 0.359,
+        "davies_bouldin": 0.894
+      },
+      "5": {
+        "silhouette": 0.361,
+        "davies_bouldin": 0.862
+      },
+      "6": {
+        "silhouette": 0.344,
+        "davies_bouldin": 0.902
+      }
+    },
+    "n": 612,
+    "features": [
+      "trips_day",
+      "length_km",
+      "span_h",
+      "peak_trips_h"
+    ],
+    "profile": {
+      "High-frequency routes": {
+        "trips_day": 260.5,
+        "length_km": 4.400000095367432,
+        "span_h": 22.1,
+        "peak_trips_h": 17.2
+      },
+      "Low-frequency routes": {
+        "trips_day": 47.5,
+        "length_km": 3.799999952316284,
+        "span_h": 16.0,
+        "peak_trips_h": 3.0
+      },
+      "Marginal routes": {
+        "trips_day": 2.0,
+        "length_km": 8.399999618530273,
+        "span_h": 0.8,
+        "peak_trips_h": 0.0
+      },
+      "Regular routes": {
+        "trips_day": 118.0,
+        "length_km": 18.0,
+        "span_h": 20.5,
+        "peak_trips_h": 7.0
+      },
+      "Sparse / limited-span routes": {
+        "trips_day": 21.0,
+        "length_km": 20.399999618530273,
+        "span_h": 14.7,
+        "peak_trips_h": 2.0
+      }
+    },
+    "sizes": {
+      "Regular routes": 238,
+      "High-frequency routes": 178,
+      "Low-frequency routes": 112,
+      "Sparse / limited-span routes": 58,
+      "Marginal routes": 26
+    }
+  },
+  "index_sensitivity": {
+    "components": [
+      "Stop coverage (500 m)",
+      "Walk distance (shorter=better)",
+      "Peak service (trips/h)",
+      "Route choice",
+      "Network reach (45 min)",
+      "Essential-facility reach"
+    ],
+    "weights": "equal (1/6) by default",
+    "spearman_median": 0.959,
+    "spearman_p5": 0.863,
+    "draws": 1000
+  },
+  "prabhag_clustering": {
+    "k": 4,
+    "selection": {
+      "4": {
+        "silhouette": 0.288,
+        "davies_bouldin": 1.201
+      },
+      "5": {
+        "silhouette": 0.263,
+        "davies_bouldin": 1.147
+      },
+      "6": {
+        "silhouette": 0.246,
+        "davies_bouldin": 1.132
+      }
+    },
+    "features": [
+      "cov_500",
+      "mean_dist_m",
+      "trips_peak_h_500_popw",
+      "routes_500_popw",
+      "area_reach_45",
+      "college_n_60",
+      "public_hospital_n_60",
+      "primary_health_n_45",
+      "pop_density_km2",
+      "sc_st_share"
+    ],
+    "stability_ari_mean": 0.972,
+    "profile": {
+      "Highly connected core": {
+        "pop": 55225.78,
+        "cov_500": 0.99,
+        "trips_peak_h_500_popw": 182.92,
+        "connectivity_index": 62.07,
+        "pop_density_km2": 65480.82
+      },
+      "Partially covered": {
+        "pop": 53234.12,
+        "cov_500": 0.41,
+        "trips_peak_h_500_popw": 27.69,
+        "connectivity_index": 7.84,
+        "pop_density_km2": 18544.51
+      },
+      "Underserved periphery": {
+        "pop": 58766.0,
+        "cov_500": 0.15,
+        "trips_peak_h_500_popw": 17.06,
+        "connectivity_index": 1.96,
+        "pop_density_km2": 3292.22
+      },
+      "Well connected": {
+        "pop": 53968.47,
+        "cov_500": 0.88,
+        "trips_peak_h_500_popw": 95.54,
+        "connectivity_index": 36.17,
+        "pop_density_km2": 50079.82
+      }
+    },
+    "sizes": {
+      "Highly connected core": 147,
+      "Well connected": 59,
+      "Partially covered": 17,
+      "Underserved periphery": 4
+    }
+  },
+  "spatial_autocorrelation": {
+    "morans_I": 0.328,
+    "p_value": 0.001,
+    "permutations": 999,
+    "weights": "6 nearest neighbours (prabhag centroids)"
+  },
+  "equity": {
+    "city_cov_500": 0.9052708466283611,
+    "sc_cov_500": 0.8849874754502887,
+    "st_cov_500": 0.8527719031838146,
+    "wilcoxon_sc_p": 0.8241741395474026,
+    "wilcoxon_st_p": 0.4014524452190279,
+    "n_sc": 227,
+    "n_st": 227,
+    "slum_area_cov_500": 0.9575231827699671,
+    "non_slum_area_cov_500": 0.6628220278893878
+  },
+  "gaps": {
+    "pop_total": 12442372.0,
+    "pop_no_stop_500": 1178655.5,
+    "pop_no_stop_800": 566929.5,
+    "pop_low_service": 67134.2109375,
+    "top25_sites_cover_pop": 380510.05275917053
+  },
+  "thin_stops": {
+    "n": 171,
+    "share": 0.0393,
+    "rule": "single route and <20 scheduled departures per day"
+  },
+  "priority_areas": [
+    {
+      "area": "Prabhag 118 (S)",
+      "pop": 55966,
+      "uncovered_500": 41649,
+      "cov_500": 0.2558139534883721,
+      "connectivity_index": 3.524229074889868,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 143 (M - East)",
+      "pop": 51412,
+      "uncovered_500": 41385,
+      "cov_500": 0.1950207468879668,
+      "connectivity_index": 4.33186490455213,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 145 (M - East)",
+      "pop": 53213,
+      "uncovered_500": 40709,
+      "cov_500": 0.23497267759562843,
+      "connectivity_index": 4.33186490455213,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 111 (S)",
+      "pop": 58366,
+      "uncovered_500": 35280,
+      "cov_500": 0.3955223880597016,
+      "connectivity_index": 5.947136563876652,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 57 (P - South)",
+      "pop": 57477,
+      "uncovered_500": 34661,
+      "cov_500": 0.3969465648854961,
+      "connectivity_index": 6.901615271659325,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 12 (R - Central)",
+      "pop": 47352,
+      "uncovered_500": 34460,
+      "cov_500": 0.27224199288256223,
+      "connectivity_index": 5.2496328928047,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 40 (P - North)",
+      "pop": 53799,
+      "uncovered_500": 33178,
+      "cov_500": 0.38328530259365995,
+      "connectivity_index": 9.2143906020558,
+      "archetype": "Partially covered"
+    },
+    {
+      "area": "Prabhag 135 (M - East)",
+      "pop": 57874,
+      "uncovered_500": 30624,
+      "cov_500": 0.4708333333333333,
+      "connectivity_index": 9.838472834067547,
+      "archetype": "Partially covered"
+    }
+  ]
+}
