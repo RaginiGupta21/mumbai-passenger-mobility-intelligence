@@ -1,85 +1,112 @@
-<div align="center">
-
 # Mumbai Passenger Mobility Intelligence System
 
-**Scheduled bus journey planning, accessibility & inclusive-mobility analytics for Mumbai - built only on open data.**
+A Streamlit app that analyses Mumbai's scheduled bus network. It plans journeys, measures how many residents live near a bus stop, and points out the areas that are poorly connected. It uses only open data. It does not use synthetic data, live bus positions, actual arrival times or passenger counts: every time shown comes from the published timetable.
 
-</div>
+![Overview of the analysis: stop access, connectivity index, suggested new stops and stop types](docs/figures/overview.png)
 
-A passenger-friendly application and analysis that answers four questions for Mumbai's public bus network: **How do I get there? Who can reach a bus stop? What does each route offer? Where are the gaps - and what should be fixed first?**
-Everything is computed from real, openly licensed data. **No synthetic data, live bus positions, actual arrival times or passenger counts are used or invented.**
+*From left to right: share of residents within 500 m of a stop, connectivity index, suggested new-stop areas, and stop types.*
 
-<table>
-<tr>
-<td width="50%"><img src="docs/figures/01_coverage_500m.png" alt="Residents within 500 m of a bus stop"/><br/><sub><b>Stop access:</b> share of residents within 500 m of a bus stop, by prabhag</sub></td>
-<td width="50%"><img src="docs/figures/02_connectivity_index.png" alt="Connectivity Index"/><br/><sub><b>Connectivity Index</b> (0-100) combining six access and service measures</sub></td>
-</tr>
-<tr>
-<td width="50%"><img src="docs/figures/04_new_stop_catchments.png" alt="Suggested new stop catchments"/><br/><sub><b>Gap analysis:</b> 25 suggested new-stop catchments (greedy maximum coverage)</sub></td>
-<td width="50%"><img src="docs/figures/05_stop_typology.png" alt="Stop typology"/><br/><sub><b>Stop typology:</b> hubs, trunk-corridor and local stops (k-means)</sub></td>
-</tr>
-</table>
+## What the app does
 
-## Quick start
+**Journey Explorer**
+- Choose a start, a destination, a date and a time to get up to six scheduled bus options.
+- Each option shows transfers, walking time, waiting time and a route map.
+- It also gives a door-to-door time summary and an approximate BEST fare range.
+- A "Where can I reach?" map shows which stops can be reached in 15 to 90 minutes.
+- A "Nearest bus stops" tool finds stops near any point, with walking time, routes and next departures.
+
+**Accessibility & Inclusion**
+- Shows how many residents are within 300, 500 and 800 m of a stop, by ward.
+- Shows how often buses run near people's homes during the morning peak.
+- Compares coverage for Scheduled Caste and Scheduled Tribe residents and for slum areas.
+- Checks access to colleges and public health facilities.
+
+**Routes & Schedules**
+- Shows each route's stops on a map, its trips and an hourly timetable.
+- Includes a departure board for any stop and a check of which dates the timetable covers.
+
+**Network Intelligence**
+- Finds the most important stops in the network.
+- Groups stops, routes and areas into types using k-means clustering.
+- Scores every area on a connectivity index and highlights clusters of weak areas.
+- Suggests 25 places where new stops would reach the most people.
+
+## Getting started
+
 ```bash
 git clone https://github.com/RaginiGupta21/mumbai-passenger-mobility-intelligence.git
 cd mumbai-passenger-mobility-intelligence
-python -m venv .venv && .venv\Scripts\activate        # macOS/Linux: source .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
-python -m streamlit run app.py                        # opens at http://localhost:8501
+python -m streamlit run app.py
 ```
-Processed data is included, so the app starts immediately. To rebuild everything from public sources (~2-3 min): `bash scripts/run_pipeline.sh`.
 
-## What it does
-| Module | Highlights |
-|---|---|
-| **Journey Explorer** | Choose origin, destination, date and time → up to 6 scheduled options with transfers, walking and waiting, a **door-to-door time summary**, an **indicative BEST fare range** and a route map. "Where can I reach in 15-90 min?" map. **Nearest bus stops** tool (click the map, type coordinates or pick a place → distance, walk time, routes, next departures). Engine: RAPTOR over 99,080 scheduled trips with real GTFS calendar logic, including after-midnight trips. |
-| **Accessibility & Inclusion** | Population-weighted stop access at 300 / 500 / 800 m (100 m grid, 12.44 M residents), peak service level, SC/ST and slum-cluster equity, access to colleges and health facilities (with explicit coordinate-uncertainty handling), 09:00 travel-time reach from every prabhag. |
-| **Routes & Schedules** | 603 active routes: stops on a map, per-trip stop times, hourly timetables, peak headway; stop departure board; service availability by date. |
-| **Network Intelligence** | NetworkX components / cut vertices / betweenness; k-means typologies of stops, routes and prabhags; Connectivity Index with sensitivity analysis; Moran's I hotspots; **suggested new-stop catchments**; number-backed recommendations; CSV downloads. |
-| **How to use / Methods** | In-app guide and glossary; sources, GTFS quality audit, methodology and limitations. |
+On macOS or Linux, activate the environment with `source .venv/bin/activate`. The app opens at http://localhost:8501. The processed data is included, so it starts straight away.
 
-## Headline results (Greater Mumbai, bus network)
-- **90.5%** of residents are within 500 m of a bus stop (77.4% within 300 m, 95.4% within 800 m); **~1.18 million** have none within 500 m.
-- Gaps are spatially clustered (Moran's I = 0.33, p = 0.001); weakest wards: M-East, T, P-North, R-Central (73-80% coverage).
-- Where stops exist, peak service is mostly frequent - only ~67 k residents are covered but get fewer than 4 trips per peak hour.
-- SC / ST coverage (88.5% / 85.3%) is a few points below the city (90.5%) but **not statistically significant** at prabhag level.
-- The Vasai-Virar (VVMT) network is a **separate component** - no scheduled transfer to BEST/TMT.
-- 25 suggested catchments would reach ~381 k of the unserved residents (32%).
+To rebuild all the data from the public sources (about 2 to 3 minutes), run `bash scripts/run_pipeline.sh`.
 
-Full list: [docs/FINDINGS.md](docs/FINDINGS.md)
+## Results
 
-## Data (all real - see [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md))
+These results are for Greater Mumbai and the bus network only.
+
+- 90.5% of residents are within 500 m of a bus stop (77.4% within 300 m and 95.4% within 800 m).
+- About 1.18 million residents have no stop within 500 m.
+- The weakest wards are M-East, T, P-North and R-Central, with 73% to 80% coverage. These weak areas are clustered, not scattered (Moran's I = 0.33, p = 0.001).
+- Where a stop exists, service is mostly frequent. Only about 67,000 residents live near a stop but get fewer than four trips per peak hour.
+- Coverage for Scheduled Caste and Scheduled Tribe residents (88.5% and 85.3%) is a little lower than the city figure (90.5%), but the difference is not statistically significant at ward level.
+- The Vasai-Virar (VVMT) network is not connected to the BEST and TMT network in this timetable.
+- The 25 suggested new-stop areas would bring about 381,000 of those residents (32%) within 500 m of a stop.
+
+The full list is in [docs/FINDINGS.md](docs/FINDINGS.md).
+
+## Data
+
 | Layer | Source | Licence |
 |---|---|---|
-| Bus timetable (BEST, TMT, KDMT, VVMT) | [croyla/mumbai-gtfs](https://github.com/croyla/mumbai-gtfs), valid 19 Aug 2026 - 15 Feb 2027 | MIT |
-| 227 BMC wards: population, SC/ST; slum clusters | [DataMeet Municipal Spatial Data](https://github.com/datameet/Municipal_Spatial_Data) | CC BY-SA 2.5 IN |
-| Colleges & universities | OpenStreetMap contributors (HOT export) | ODbL |
-| Public health facilities | MCGM open data (KML) | MCGM open data |
-| BEST fare slabs (indicative) | Press reports, stored in `data/reference/best_fares.json` | Not an official table |
+| Bus timetable (BEST, TMT, KDMT, VVMT) | [croyla/mumbai-gtfs](https://github.com/croyla/mumbai-gtfs), valid 19 Aug 2026 to 15 Feb 2027 | MIT |
+| Ward boundaries, population, slum clusters | [DataMeet](https://github.com/datameet/Municipal_Spatial_Data) | CC BY-SA 2.5 IN |
+| Colleges and universities | OpenStreetMap contributors | ODbL |
+| Public health facilities | MCGM open data | MCGM open data |
+| BEST fare slabs (approximate) | News reports, saved in `data/reference/best_fares.json` | Not an official table |
 
-## Honest limitations
-Scheduled, not live · bus only (no rail / Metro) · only 7.5% of stop times are official timepoints (the rest interpolated) · one timetable for all 7 days · unofficial community GTFS · walking = straight line × 1.3 (no road network) · uniform population inside each prabhag · OSM colleges incomplete (44) and MCGM health coordinates rounded (~±0.5 km) · fares are indicative only · typologies are descriptive (silhouette 0.29-0.36). Details: [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
+More detail is in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+
+## Limitations
+
+- Times are scheduled, not live. Most stop times in the feed are interpolated, so treat them as accurate to about 5 minutes.
+- Only buses are included. Trains and the Metro are not.
+- Walking distance is a straight line multiplied by 1.3, because no road network was used.
+- Population is assumed to be spread evenly inside each ward area.
+- The college list is incomplete, and the health facility coordinates are rounded to about 500 m.
+- Fares are approximate and not official.
+- The timetable has one pattern for all seven days, so weekdays and weekends cannot be compared.
+
+More detail is in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 
 ## Project structure
+
 ```
-app.py                    Streamlit entry point
-src/                      timetable, RAPTOR router, journey, fares, nearest stops, facilities, maps, ui/ (one module per page)
-scripts/00..08_*.py       reproducible pipeline (+ run_pipeline.sh)
-data/raw/                 source files          data/reference/   editable fare table
-data/processed/           parquet tables, geojson, diagnostics
-powerbi/                  Power BI-ready CSV tables + build guide
-docs/                     METHODOLOGY · DATA_SOURCES · DATA_QUALITY · FINDINGS · LIMITATIONS · figures/
-tests/                    23 pytest checks + 30 headless UI checks
+app.py              Streamlit entry point
+src/                Journey planner, fares, nearest stops and one module per page
+scripts/            Steps that build the data (00 to 08) and run_pipeline.sh
+data/raw/           Source files
+data/reference/     Editable fare table
+data/processed/     Tables and maps produced by the scripts
+powerbi/            Tables for a Power BI dashboard, with a guide
+docs/               Methodology, data sources, data quality, findings, limitations
+tests/              Automated tests
 ```
 
-## Testing
+## Tests
+
 ```bash
-python -m pytest -q tests/test_core.py   # integrity, calendar, router never slower than a scheduled trip, itineraries, fares, accessibility
-python tests/smoke_all_pages.py          # renders every page and clicks the real controls headlessly
+python -m pytest -q tests/test_core.py
+python tests/smoke_all_pages.py
 ```
+
+The first command runs 23 checks on the data and the journey planner. The second opens every page and clicks the main controls.
 
 ## Credits
-Contains data © OpenStreetMap contributors (ODbL); DataMeet Trust (CC BY-SA 2.5 IN); MCGM open data; croyla/mumbai-gtfs (MIT). Code released under the [MIT License](LICENSE).
 
-*Built by [Ragini Gupta](https://github.com/RaginiGupta21).*
+Contains data from OpenStreetMap contributors (ODbL), DataMeet Trust (CC BY-SA 2.5 IN), MCGM open data and croyla/mumbai-gtfs (MIT). The code is released under the [MIT License](LICENSE).
