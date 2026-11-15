@@ -32,9 +32,9 @@ def _picker(prefix, title, d, tt, default_label):
 def _timeline(j):
     for l in j["legs"]:
         if l["kind"] == "walk":
-            st.markdown(f'<div class="leg walk">🚶 <div><b>Walk {l["mins"]:.0f} min</b> (~{l["metres"]:.0f} m)<br><span style="color:#6B7B83">{l["from_name"]} → {l["to_name"]}</span></div></div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="leg walk"><span class="mode walk">WALK</span><div><b>{l["mins"]:.0f} min</b> (~{l["metres"]:.0f} m)<br><span style="color:#6B7B83">{l["from_name"]} → {l["to_name"]}</span></div></div>', unsafe_allow_html=True)
         else:
-            st.markdown(f'<div class="leg">🚌 <div><b>Bus {l["route"]}</b> <span class="chip">{l["agency"]}</span> towards <i>{l["headsign"]}</i><br>'
+            st.markdown(f'<div class="leg"><span class="mode">{l["route"]}</span><div><b>Bus {l["route"]}</b> <span class="chip">{l["agency"]}</span> towards <i>{l["headsign"]}</i><br>'
                         f'<b>{s_to_hm(l["dep"])}</b> {l["board"]}<br><b>{s_to_hm(l["arr"])}</b> {l["alight"]} · {l["n_stops"]} stops · ~{l["mins"]:.0f} min on board</div></div>', unsafe_allow_html=True)
 
 

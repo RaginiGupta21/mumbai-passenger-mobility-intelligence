@@ -6,7 +6,7 @@ from pathlib import Path
 from streamlit.testing.v1 import AppTest
 
 APP = str(Path(__file__).resolve().parents[1] / "app.py")
-PAGES = ["🏠  Home", "🧭  Journey Explorer", "♿  Accessibility & Inclusion", "🚌  Routes & Schedules", "🕸️  Network Intelligence", "📖  How to use", "📚  Methods & Data"]
+PAGES = ["Home", "Journey Explorer", "Accessibility & Inclusion", "Routes & Schedules", "Network Intelligence", "How to use", "Methods & Data"]
 fails = 0
 
 

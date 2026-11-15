@@ -28,7 +28,7 @@ def render(d, tt):
         kpi(k[2], "Peak headway", f"{r.headway_peak_min:.0f} min" if pd.notna(r.headway_peak_min) else "n/a", "08-10h, all directions combined")
         kpi(k[3], "Typical length", f"{r.length_km:.1f} km", f"{r.median_stops:.0f} stops")
         kpi(k[4], "Typical run time", f"{r.median_dur_min:.0f} min")
-        kpi(k[5], "Scheduled speed", f"{r.sched_speed_kmh:.0f} km/h" if pd.notna(r.sched_speed_kmh) else "n/a", "⚠ unreliable" if not r.get("speed_plausible", True) else "plausible")
+        kpi(k[5], "Scheduled speed", f"{r.sched_speed_kmh:.0f} km/h" if pd.notna(r.sched_speed_kmh) else "n/a", "unreliable" if not r.get("speed_plausible", True) else "plausible")
         trips = d["trips"][d["trips"].route_idx == ridx]
         pats = trips.trip_idx.map(lambda t: int(tt.trip_pattern[t])).value_counts()
         S = tt.stops

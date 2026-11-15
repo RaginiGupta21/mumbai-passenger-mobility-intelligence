@@ -15,7 +15,9 @@ h1, h2, h3 {{color: {C['ink']}; letter-spacing: -0.01em;}}
 .kpi .s {{font-size: .78rem; color: {C['muted']};}}
 .chip {{display:inline-block; padding: 2px 10px; border-radius: 999px; font-size: .75rem; margin-right: 6px; background:{C['mist']}; color:{C['navy']};}}
 .chip.real {{background:#DDEBE3; color:#35624A;}} .chip.derived {{background:#EFE6CF; color:#7A6430;}} .chip.assump {{background:#F0DDD6; color:#8A4B38;}}
-.leg {{display:flex; gap:10px; padding:8px 10px; border-left:4px solid {C['teal']}; background:#FBF9F4; margin:6px 0; border-radius:0 10px 10px 0;}}
+.mode {{display:inline-block; min-width:52px; height:fit-content; text-align:center; padding:3px 8px; border-radius:6px; font-weight:700; font-size:.82rem; color:#fff; background:{C['teal']};}}
+.mode.walk {{background:#B9A67C; font-size:.7rem; letter-spacing:.05em;}}
+.leg {{display:flex; gap:12px; align-items:flex-start; padding:8px 10px; border-left:4px solid {C['teal']}; background:#FBF9F4; margin:6px 0; border-radius:0 10px 10px 0;}}
 .leg.walk {{border-left-color:{C['sand']};}}
 .note {{background:#FBF4E4; border:1px solid #EBDDB8; border-radius:10px; padding:8px 12px; font-size:.86rem; color:#6B5A2E;}}
 .stTabs [data-baseweb="tab"] {{font-weight: 600;}}
