@@ -7,7 +7,7 @@ Power BI Desktop is not available in the build environment, so **no .pbix file i
 | `dim_prabhag.csv` | 227 prabhags | `prabhag` | Choropleth/bubble map (lat, lon), coverage, service, index, archetype, hotspot flag |
 | `fact_ward_summary.csv` | 24 BMC wards | `admin_ward` | Ward bar charts |
 | `dim_stop.csv` | 4,346 stops | `stop_id` | Stop map, typology, betweenness |
-| `dim_route.csv` | 603 routes | `route_id` | Route typology scatter, headway |
+| `dim_route.csv` | 612 routes | `route_id` | Route typology scatter, headway |
 | `fact_facility_access.csv` | usable facilities | `fid` | Certain/possible access tables |
 | `fact_suggested_stop_catchments.csv` | 25 sites | `rank` | Prioritisation map/table |
 | `fact_grid_300m.csv` | 300 m cells | - | Heat/density map (population, mean distance, service) |

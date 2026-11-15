@@ -42,7 +42,7 @@ Graph: stops as nodes; edges between consecutive stops on any trip (weight = med
 | Unit | Features | Method | k selection | Result |
 |---|---|---|---|---|
 | Stops in Greater Mumbai (4,346) | routes, departures/day, peak departures/h, degree, betweenness, nearby stops (log1p, z-score) | k-means | silhouette k = 3-7 | k = 3 (sil. 0.31): hubs / trunk / local |
-| Routes (603) | trips/day, length, span, peak trips/h | k-means | silhouette k = 3-6 | k = 5 (sil. 0.36) |
+| Routes (612) | trips/day, length, span, peak trips/h | k-means | silhouette k = 3-6 | k = 5 (sil. 0.36) |
 | Prabhags (227) | coverage, walk distance, peak service, routes, 45-min reach, facility reach, density, SC+ST share | k-means | silhouette k = 4-6 (k = 3 rejected: isolates 4 outliers) | k = 4 (sil. 0.29, run-to-run ARI 0.97) |
 
 Clustering is used because each case is a *typology of many units described by several correlated measures*; it is **not** used for the journey planner or the coverage statistics. Scheduled speed was excluded from route clustering after the audit showed it to be unreliable. Because silhouettes are < 0.5 the groups are tiers on a continuum; cluster names are assigned by rank on mean departures (stops, routes) or mean Connectivity Index (prabhags) and described by their actual profiles in the app.
