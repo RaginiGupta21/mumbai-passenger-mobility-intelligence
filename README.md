@@ -1,37 +1,47 @@
-# Mumbai Passenger Mobility Intelligence System
+# Public Transport Demand and Service Gap Analysis: P-North Ward, Mumbai
 
-A Streamlit app that analyses Mumbai's scheduled bus network. It plans journeys, measures how many residents live near a bus stop, and points out the areas that are poorly connected. It uses only open data. It does not use synthetic data, live bus positions, actual arrival times or passenger counts: every time shown comes from the published timetable.
+[WRITE 2 SENTENCES IN YOUR OWN WORDS: why you chose this area and this topic. Mention anything personal, such as a route you take or something you noticed.]
 
-![Overview of the analysis: stop access, connectivity index, suggested new stops and stop types](docs/figures/overview.png)
+This project looks at where residents of one Mumbai ward have too little bus service for the number of people who live there. It uses the published bus timetable and Census 2011 population. It does not use made-up data, live bus positions or passenger counts.
 
-*From left to right: share of residents within 500 m of a stop, connectivity index, suggested new-stop areas, and stop types.*
+![Service gap by prabhag, and suggested new stop areas, in P-North ward](docs/overview.png)
 
-## What the app does
+## Study area
 
-**Journey Explorer**
-- Choose a start, a destination, a date and a time to get up to six scheduled bus options.
-- Each option shows transfers, walking time, waiting time and a route map.
-- It also gives a door-to-door time summary and an approximate BEST fare range.
-- A "Where can I reach?" map shows which stops can be reached in 15 to 90 minutes.
-- A "Nearest bus stops" tool finds stops near any point, with walking time, routes and next departures.
+**P-North ward** (the Malad area) is a mainly residential ward with 959,595 residents, split into 18 small areas called prabhags (16 of them densely populated).
 
-**Accessibility & Inclusion**
-- Shows how many residents are within 300, 500 and 800 m of a stop, by ward.
-- Shows how often buses run near people's homes during the morning peak.
-- Compares coverage for Scheduled Caste and Scheduled Tribe residents and for slum areas.
-- Checks access to colleges and public health facilities.
+I chose it by comparing wards on the same measure. Residents count as *underserved* if they have no bus stop within 500 m, or a stop but fewer than 10 scheduled bus trips per hour in the morning peak.
 
-**Routes & Schedules**
-- Shows each route's stops on a map, its trips and an hourly timetable.
-- Includes a departure board for any stop and a check of which dates the timetable covers.
+| Area | Residents | Underserved | No stop nearby | Stop but low frequency |
+|---|---|---|---|---|
+| Greater Mumbai | 12.44 million | 10.9% | 9.5% | 1.4% |
+| **P-North** | 959,595 | **27.3%** | 22.7% | 4.6% |
+| M-East | 814,543 | 27.1% | 26.9% | 0.2% |
 
-**Network Intelligence**
-- Finds the most important stops in the network.
-- Groups stops, routes and areas into types using k-means clustering.
-- Scores every area on a connectivity index and highlights clusters of weak areas.
-- Suggests 25 places where new stops would reach the most people.
+P-North has the largest underserved population of the weakest wards, and it has both kinds of gap: stops that are too far away, and too few buses where stops exist.
 
-## Getting started
+## The two questions
+
+1. **Where is the gap?** A map and chart showing, area by area, where many residents (demand) have too little bus service (supply).
+2. **Where should it be fixed first?** A ranking of the areas that need attention and ten suggested places for new stops.
+
+## How the gap is measured
+
+- **Demand** is the number of residents in each prabhag (Census 2011). Passenger counts are not available, so residents stand in for demand.
+- **Supply** is the distance to the nearest bus stop and the number of scheduled trips per hour (08:00 to 10:00) within 500 m. A trip that passes several nearby stops is counted once.
+- **Underserved** residents have no stop within 500 m, or a stop but fewer than 10 trips per peak hour.
+- Residents are spread evenly inside each prabhag on a 100 m grid.
+
+## Findings
+
+- 262,372 residents of P-North (27.3%) are underserved, compared with 10.9% across Greater Mumbai.
+- 217,879 of them have no stop within 500 m, and 44,493 have a stop but low frequency.
+- Morning peak service near residents averages about 98 trips per hour, against about 146 across the city.
+- Five prabhags have half or more of their residents underserved: 32, 38, 40, 48 and 49.
+- Among the dense residential prabhags, the most residents with no stop nearby are in 40 (about 33,000), 48 (about 28,000) and 38 (about 26,000).
+- Ten suggested new stop areas would bring about 142,000 residents within 500 m of a stop (65% of those with none). Seven of the ten are in dense residential prabhags (about 123,000 residents). The other three (about 19,000) are in the large, sparsely built-up prabhags 32 and 49, so they need checking on the ground.
+
+## How to run
 
 ```bash
 git clone https://github.com/RaginiGupta21/mumbai-passenger-mobility-intelligence.git
@@ -42,71 +52,53 @@ pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-On macOS or Linux, activate the environment with `source .venv/bin/activate`. The app opens at http://localhost:8501. The processed data is included, so it starts straight away.
-
-To rebuild all the data from the public sources (about 2 to 3 minutes), run `bash scripts/run_pipeline.sh`.
-
-## Results
-
-These results are for Greater Mumbai and the bus network only.
-
-- 90.5% of residents are within 500 m of a bus stop (77.4% within 300 m and 95.4% within 800 m).
-- About 1.18 million residents have no stop within 500 m.
-- The weakest wards are M-East, T, P-North and R-Central, with 73% to 80% coverage. These weak areas are clustered, not scattered (Moran's I = 0.33, p = 0.001).
-- Where a stop exists, service is mostly frequent. Only about 67,000 residents live near a stop but get fewer than four trips per peak hour.
-- Coverage for Scheduled Caste and Scheduled Tribe residents (88.5% and 85.3%) is a little lower than the city figure (90.5%), but the difference is not statistically significant at ward level.
-- The Vasai-Virar (VVMT) network is not connected to the BEST and TMT network in this timetable.
-- The 25 suggested new-stop areas would bring about 381,000 of those residents (32%) within 500 m of a stop.
-
-The full list is in [docs/FINDINGS.md](docs/FINDINGS.md).
+The processed data is included, so the app starts straight away. To rebuild it from the raw files (about a minute), run `python scripts/01_prepare_data.py`. To study a different ward, change `STUDY_WARD` in `src/config.py` (for example `"M - East"`) and run that script again.
 
 ## Data
 
-| Layer | Source | Licence |
+| Data | Source | Licence |
 |---|---|---|
-| Bus timetable (BEST, TMT, KDMT, VVMT) | [croyla/mumbai-gtfs](https://github.com/croyla/mumbai-gtfs), valid 19 Aug 2026 to 15 Feb 2027 | MIT |
-| Ward boundaries, population, slum clusters | [DataMeet](https://github.com/datameet/Municipal_Spatial_Data) | CC BY-SA 2.5 IN |
-| Colleges and universities | OpenStreetMap contributors | ODbL |
-| Public health facilities | MCGM open data | MCGM open data |
-| BEST fare slabs (approximate) | News reports, saved in `data/reference/best_fares.json` | Not an official table |
+| Bus timetable (BEST, TMT, KDMT, VVMT), valid 19 Aug 2026 to 15 Feb 2027 | [croyla/mumbai-gtfs](https://github.com/croyla/mumbai-gtfs) | MIT |
+| Prabhag boundaries and Census 2011 population | [DataMeet](https://github.com/datameet/Municipal_Spatial_Data) | CC BY-SA 2.5 India |
 
-More detail is in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
-
-## Limitations
-
-- Times are scheduled, not live. Most stop times in the feed are interpolated, so treat them as accurate to about 5 minutes.
-- Only buses are included. Trains and the Metro are not.
-- Walking distance is a straight line multiplied by 1.3, because no road network was used.
-- Population is assumed to be spread evenly inside each ward area.
-- The college list is incomplete, and the health facility coordinates are rounded to about 500 m.
-- Fares are approximate and not official.
-- The timetable has one pattern for all seven days, so weekdays and weekends cannot be compared.
-
-More detail is in [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
+Quality checks on the timetable are saved in `data/processed/data_quality.json`. The population adds up to 12,442,373, the Census 2011 total for Greater Mumbai.
 
 ## Project structure
 
 ```
-app.py              Streamlit entry point
-src/                Journey planner, fares, nearest stops and one module per page
-scripts/            Steps that build the data (00 to 08) and run_pipeline.sh
-data/raw/           Source files
-data/reference/     Editable fare table
-data/processed/     Tables and maps produced by the scripts
-powerbi/            Tables for a Power BI dashboard, with a guide
-docs/               Methodology, data sources, data quality, findings, limitations
-tests/              Automated tests
+app.py                      the two-page Streamlit app
+src/config.py               settings (study ward, distances, peak hours)
+src/gap.py                  helper functions for the app
+scripts/01_prepare_data.py  builds all the data the app needs
+scripts/02_make_figure.py   draws docs/overview.png
+tests/                      automated checks
+data/raw/                   source files
+data/processed/             results used by the app
+docs/METHOD.md              the method in more detail
 ```
 
-## Tests
+## Limitations
 
-```bash
-python -m pytest -q tests/test_core.py
-python tests/smoke_all_pages.py
-```
+- Residents stand in for demand. Real passenger counts would be better but are not openly available.
+- Population is assumed to be spread evenly inside each prabhag. This is weakest in the large, sparsely built-up prabhags (32 and 49), where residents are probably clustered in a few places.
+- Distances are straight lines. No road network or barriers (railway lines, creeks) are used.
+- Times in the timetable are scheduled and partly interpolated (only 7.5% are official timepoints).
+- Only buses are included, so areas near train or Metro stations may be better connected than shown.
+- Population is from 2011 and the timetable is from 2026.
+- The suggested stop areas are starting points for planners, not final locations.
 
-The first command runs 23 checks on the data and the journey planner. The second opens every page and clicks the main controls.
+## What I learned
+
+[WRITE THIS YOURSELF, 4 to 6 sentences: what was hard, what you did not understand at first, what surprised you in the data, and what you would do differently.]
+
+## How this was built
+
+[EDIT THIS TO BE TRUE. For example: "I chose the topic and the study area and decided how to define a service gap. I used an AI assistant (Claude) to help write and debug the code, and I [ran and tested it / read through the code / wrote the findings myself]." Follow your course's rules on AI use.]
+
+## Branches
+
+`main` is this simplified project. The branch `full-version` keeps my earlier, larger version with a journey planner, route pages, network analysis and a Power BI export.
 
 ## Credits
 
-Contains data from OpenStreetMap contributors (ODbL), DataMeet Trust (CC BY-SA 2.5 IN), MCGM open data and croyla/mumbai-gtfs (MIT). The code is released under the [MIT License](LICENSE).
+Contains data from DataMeet Trust (CC BY-SA 2.5 India) and croyla/mumbai-gtfs (MIT). Code released under the MIT License (see `LICENSE`).

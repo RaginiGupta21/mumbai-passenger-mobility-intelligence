@@ -1,0 +1,100 @@
+"""Small helpers for the app: load the processed data, colour ramp, map layers and recommendation text."""
+import json
+import folium
+import pandas as pd
+from .config import *
+
+TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"   # free CARTO light basemap
+ATTR = "© OpenStreetMap contributors © CARTO"
+COLORS = ("#EFE6D8", "#E3B88C", "#C9856B", "#9C5A55", "#6B3F46")           # soft light-to-dark scale (more gap = darker)
+
+
+def load_data() -> dict:
+    d = {"sites": pd.read_parquet(PROC / "new_stop_sites.parquet"), "wards": pd.read_parquet(PROC / "ward_summary.parquet"),
+         "cells": pd.read_parquet(PROC / "study_cells.parquet"), "stops": pd.read_parquet(PROC / "stops.parquet"),
+         "meta": json.load(open(PROC / "data_quality.json"))}
+    geo = json.load(open(PROC / "prabhags.geojson"))
+    d["geo"] = geo
+    d["pr"] = pd.DataFrame([f["properties"] for f in geo["features"]])
+    return d
+
+
+def ramp(v, vmin, vmax, colors=COLORS) -> str:
+    t = 0 if vmax == vmin else max(0.0, min(1.0, (v - vmin) / (vmax - vmin)))
+    n = len(colors) - 1; i = min(int(t * n), n - 1); f = t * n - i
+    a = [int(colors[i][k:k + 2], 16) for k in (1, 3, 5)]; b = [int(colors[i + 1][k:k + 2], 16) for k in (1, 3, 5)]
+    return "#%02x%02x%02x" % tuple(int(a[j] + (b[j] - a[j]) * f) for j in range(3))
+
+
+def base_map(center=None, zoom=12):
+    m = folium.Map(location=center or [19.07, 72.88], zoom_start=zoom, tiles=None, control_scale=True)
+    folium.TileLayer(tiles=TILES, attr=ATTR, subdomains="abcd", max_zoom=19, name="Basemap").add_to(m)
+    return m
+
+
+def fit_to(m, d, ward_only=True):
+    pts = [c for f in d["geo"]["features"] if (f["properties"]["admin_ward"] == STUDY_WARD or not ward_only)
+           for ring in (f["geometry"]["coordinates"] if f["geometry"]["type"] == "Polygon" else [r for p in f["geometry"]["coordinates"] for r in p])
+           for c in (ring if isinstance(ring[0][0], float) else [q for r in ring for q in r])]
+    la = [p[1] for p in pts]; lo = [p[0] for p in pts]
+    m.fit_bounds([[min(la), min(lo)], [max(la), max(lo)]], padding=(15, 15))
+
+
+MEASURES = {   # label -> (column, tooltip format, higher means worse?)
+    "Underserved share of residents": ("underserved_share", "{:.0%}", True),
+    "Residents with no stop within 500 m": ("no_stop_pop", "{:,.0f}", True),
+    "Residents with a stop but low frequency": ("low_freq_pop", "{:,.0f}", True),
+    "Peak-hour bus trips (supply)": ("peak_trips_h", "{:.0f} per hour", False),
+    "Residents (demand)": ("pop", "{:,.0f}", True),
+}
+
+
+def choropleth(m, d, label, ward_only=True):
+    col, fmt, _ = MEASURES[label]
+    df = d["pr"].set_index("prabhag")
+    shown = df[df.admin_ward == STUDY_WARD] if ward_only else df
+    vmin, vmax = float(shown[col].min()), float(shown[col].max())
+    feats = []
+    for f in d["geo"]["features"]:
+        p = f["properties"]
+        if ward_only and p["admin_ward"] != STUDY_WARD:
+            continue
+        q = dict(p, label=f"Prabhag {p['prabhag']} ({p['admin_ward']})", residents=f"{p['pop']:,.0f}", value=fmt.format(p[col]),
+                 underserved=f"{p['underserved_pop']:,.0f} ({p['underserved_share']:.0%})", v=float(p[col]))
+        feats.append({"type": "Feature", "geometry": f["geometry"], "properties": q})
+    folium.GeoJson({"type": "FeatureCollection", "features": feats},
+                   style_function=lambda f: dict(fillColor=ramp(f["properties"]["v"], vmin, vmax), color="#FFFFFF", weight=1, fillOpacity=.78),
+                   highlight_function=lambda f: dict(weight=3, color="#2F3E46"),
+                   tooltip=folium.GeoJsonTooltip(fields=["label", "residents", "value", "underserved"], aliases=["", "Residents", label, "Underserved"], sticky=True)).add_to(m)
+    return vmin, vmax
+
+
+def stops_layer(m, d):
+    feats = [{"type": "Feature", "geometry": {"type": "Point", "coordinates": [r.stop_lon, r.stop_lat]},
+              "properties": {"name": r.stop_name, "trips": f"{r.peak_trips_h:.0f}"}} for r in d["stops"].itertuples()]
+    folium.GeoJson({"type": "FeatureCollection", "features": feats}, name="Bus stops",
+                   marker=folium.CircleMarker(radius=2.5, weight=0, fill=True, fill_color="#2F4F63", fill_opacity=.8),
+                   tooltip=folium.GeoJsonTooltip(fields=["name", "trips"], aliases=["Stop", "Peak trips/hour"])).add_to(m)
+
+
+def recommendations(d) -> list:
+    pr, sites, w = d["pr"], d["sites"], d["wards"]
+    s = pr[pr.admin_ward == STUDY_WARD]
+    ward = w[w.is_study_ward].iloc[0]
+    dense_pr = s[s.area_type == "dense residential"]; thin_pr = s[s.area_type != "dense residential"]
+    top_no_stop = dense_pr.sort_values("no_stop_pop", ascending=False).head(3)
+    top_low = s.sort_values("low_freq_pop", ascending=False).head(3)
+    by_site = sites.groupby("prabhag").newly_covered.sum().sort_values(ascending=False).head(3)
+    dense = sites[sites.area_type == "dense residential"]; thin = sites[sites.area_type != "dense residential"]
+    first = (f"Add stops in the {len(sites)} suggested areas. Together they would bring about {sites.cumulative_covered.iloc[-1]:,.0f} residents within {NEAR_M} m of a stop "
+             f"({sites.cumulative_share_of_no_stop.iloc[-1]:.0%} of those currently without one). {len(dense)} of the {len(sites)} sites are in dense residential prabhags "
+             f"(about {dense.newly_covered.sum():,.0f} residents). The other {len(thin)} (about {thin.newly_covered.sum():,.0f} residents) are in large, lower-density prabhags "
+             f"({', '.join(map(str, sorted(thin.prabhag.unique())))}) where residents are probably clustered in a few settlements, so check those on the ground first.")
+    return [
+        first,
+        f"Start with the dense residential prabhags where the most residents have no stop nearby: {', '.join(f'{int(r.prabhag)} (about {r.no_stop_pop:,.0f})' for r in top_no_stop.itertuples())}. "
+        f"Prabhags {', '.join(str(int(x)) for x in thin_pr.sort_values('no_stop_pop', ascending=False).prabhag)} also show large gaps, but their numbers are less certain because they are big and sparsely built-up.",
+        f"Add or lengthen bus trips where a stop exists but service is thin. Prabhags {', '.join(f'{int(r.prabhag)} (about {r.low_freq_pop:,.0f} residents)' for r in top_low.itertuples())} "
+        f"have the most residents in that situation. In the whole ward {ward.low_freq_pop:,.0f} residents are affected.",
+        "Treat these as starting points for planners, not final decisions: they ignore roads, land use and real passenger counts (see 'How this was calculated, and its limits' at the top of the page).",
+    ]

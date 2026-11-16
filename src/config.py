@@ -1,33 +1,21 @@
-"""Central configuration: paths, projection, analysis parameters."""
+"""Settings for the study. Change STUDY_WARD to analyse a different ward (e.g. "M - East"), then rerun the data script."""
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
 PROC = ROOT / "data" / "processed"
-OUT = ROOT / "outputs"
-DOCS = ROOT / "docs"
-POWERBI = ROOT / "powerbi" / "data"
-
 GTFS_ZIP = RAW / "mumbai_gtfs_compat.zip"
+WARDS_FILE = RAW / "boundaries" / "bmc_electoral_wards_2017.geojson"
 
-CRS_WGS84 = "EPSG:4326"
-CRS_UTM = "EPSG:32643"          # UTM zone 43N - metric CRS for Mumbai
+STUDY_WARD = "P - North"          # BMC administrative ward studied in detail (as named in the ward file)
 
-# Walking assumptions (documented in docs/METHODOLOGY.md)
-WALK_SPEED_MS = 1.2             # m/s  (~4.3 km/h)
-DETOUR_FACTOR = 1.3             # straight-line -> street-network proxy (no OSM roads available offline)
-MIN_TRANSFER_S = 120            # minimum buffer between alighting and boarding (times are partly interpolated)
-MAX_TRANSFER_WALK_M = 400       # stop-to-stop walking links (straight-line)
-ACCESS_RADII_M = (300, 500, 800)
-GRID_M = 100                    # accessibility grid resolution
-PEAK_START_H, PEAK_END_H = 8, 10  # AM peak window used for level-of-service
+CRS_UTM = "EPSG:32643"            # metric map projection for Mumbai
+NEAR_M = 500                      # a stop within this straight-line distance counts as "near"
+LOW_FREQ = 10                     # fewer scheduled trips per peak hour than this counts as low frequency
+PEAK_START_H, PEAK_END_H = 8, 10  # morning peak window
+GRID_M = 100                      # size of the grid cells used to place residents
+N_NEW_STOPS = 10                  # how many new stop areas to suggest in the study ward
 
-# Level of service (peak departures per hour within 500 m)
-LOS_BANDS = [(0, "No service"), (4, "Low (<4/h)"), (10, "Moderate (4-10/h)"), (10**9, "High (10+/h)")]
 
-# Muted palette (soft, non-neon, non-black)
-PALETTE = {
-    "bg": "#F5F2EB", "panel": "#FFFFFF", "ink": "#2F3E46", "muted": "#6B7B83",
-    "teal": "#3F7C85", "sage": "#7FA38F", "sand": "#D9C7A3", "clay": "#B8795A",
-    "navy": "#41596E", "rose": "#B5707A", "gold": "#C9A25B", "mist": "#DCE5E4",
-}
+def ward_label(ward: str = STUDY_WARD) -> str:
+    return ward.replace(" - ", "-") + " ward"

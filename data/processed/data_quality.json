@@ -1,0 +1,32 @@
+{
+  "quality": {
+    "stops": 7506,
+    "trips": 99080,
+    "stop_time_rows": 2655026,
+    "stop_times_with_unknown_stop": 0,
+    "stop_times_with_unknown_trip": 0,
+    "trips_without_stop_times": 0,
+    "duplicate_stop_ids": 0,
+    "share_official_timepoints": 0.0746,
+    "note": "Only a small share of stop times are official timepoints; the rest are interpolated, so times are approximate.",
+    "residents_total": 12442373,
+    "residents_matches_census_2011_total": true
+  },
+  "settings": {
+    "study_ward": "P - North",
+    "near_m": 500,
+    "low_freq_trips_per_hour": 10,
+    "peak_hours": [
+      8,
+      10
+    ],
+    "grid_m": 100,
+    "city": {
+      "residents": 12442373.0,
+      "underserved": 1350456.0794156524,
+      "no_stop": 1178655.4602241379,
+      "low_freq": 171800.61919151474
+    },
+    "feed_note": "Scheduled timetable only: no live data, no passenger counts."
+  }
+}
