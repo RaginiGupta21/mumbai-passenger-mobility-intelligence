@@ -53,7 +53,7 @@ with st.expander("How this was calculated, and its limits"):
 # =====================================================================================  PAGE 1
 if page == "Service gap map":
     st.title(f"Service gap map: {label}")
-    st.markdown("Where do many residents (**demand**) have too little bus service (**supply**)? Darker areas have a bigger gap.")
+    st.markdown("Where do many residents (**demand**) have too little bus service (**supply**)? Choose a measure below; the note under the map explains the colours.")
     k = st.columns(4)
     kpi(k[0], "Residents", f"{sw['pop']:,.0f}", f"{label}, Census 2011")
     kpi(k[1], "Underserved residents", f"{sw.underserved_pop:,.0f}", f"{sw.underserved_share:.1%} of the ward (city: {city_share:.1%})")
@@ -66,11 +66,11 @@ if page == "Service gap map":
     show_heat = c[2].checkbox("Show residents without a stop", value=False, key="show_heat")
     m = gap.base_map(*gap.ward_view(d)); gap.choropleth(m, d, measure)
     if show_stops: gap.stops_layer(m, d)
-    if show_heat:
-        u = d["cells"][d["cells"].no_stop]
+    u = d["cells"][d["cells"].no_stop]
+    if show_heat and len(u):
         HeatMap(u[["lat", "lon", "pop"]].values.tolist(), radius=14, blur=18, min_opacity=.25, gradient={0.3: "#E3B88C", 0.6: "#C9856B", 1: "#8F4A45"}).add_to(m)
     st_folium(m, height=540, use_container_width=True, returned_objects=[], key="gapmap")
-    st.caption(f"{measure}. Hover over an area for details. Source: GTFS timetable and Census 2011.")
+    st.caption(f"{gap.MEASURES[measure][3]} Hover over an area for details. Source: GTFS timetable and Census 2011.")
 
     pr = d["pr"]; s = pr[pr.admin_ward == STUDY_WARD].copy().sort_values("underserved_pop")
     long = pd.concat([s.assign(kind="No stop within 500 m", people=s.no_stop_pop), s.assign(kind="Stop nearby but low frequency", people=s.low_freq_pop)])
@@ -90,7 +90,17 @@ if page == "Service gap map":
 else:
     st.title(f"Where to fix it: {label}")
     st.markdown("Which areas should come first, and where would a new stop help the most residents?")
-    sites = d["sites"]; last = sites.iloc[-1]
+    sites = d["sites"]
+    if sites.empty:
+        st.success(f"Every resident of the {label} already has a bus stop within {NEAR_M} m, so no new stop areas are needed.")
+        for r in gap.recommendations(d): st.markdown("- " + r)
+        wd = w.sort_values("underserved_share")
+        f = px.bar(wd, x="underserved_share", y="admin_ward", orientation="h", color="is_study_ward", title="Underserved share of residents, by BMC ward",
+                   color_discrete_map={True: "#C9856B", False: "#B9C9C4"})
+        f.update_layout(height=520, margin=dict(l=8, r=8, t=40, b=8), showlegend=False, xaxis_tickformat=".0%", xaxis_title="", yaxis_title="")
+        st.plotly_chart(f, width="stretch")
+        st.stop()
+    last = sites.iloc[-1]
     after = sw.no_stop_pop - last.cumulative_covered
     k = st.columns(3)
     kpi(k[0], "Residents with no stop nearby", f"{sw.no_stop_pop:,.0f}", f"{label} today")
@@ -103,7 +113,7 @@ else:
         folium.GeoJson({"type": "FeatureCollection", "features": [f for f in d["geo"]["features"] if f["properties"]["admin_ward"] == STUDY_WARD]},
                        style_function=lambda f: dict(fillColor="#EFE6D8", color="#FFFFFF", weight=1, fillOpacity=.7)).add_to(m)
         u = d["cells"][d["cells"].no_stop]
-        HeatMap(u[["lat", "lon", "pop"]].values.tolist(), radius=14, blur=18, min_opacity=.2, gradient={0.3: "#E3B88C", 0.6: "#C9856B", 1: "#8F4A45"}).add_to(m)
+        if len(u): HeatMap(u[["lat", "lon", "pop"]].values.tolist(), radius=14, blur=18, min_opacity=.2, gradient={0.3: "#E3B88C", 0.6: "#C9856B", 1: "#8F4A45"}).add_to(m)
         gap.stops_layer(m, d)
         for r in sites.itertuples():
             col = "#3F7C85" if r.area_type == "dense residential" else "#B8795A"

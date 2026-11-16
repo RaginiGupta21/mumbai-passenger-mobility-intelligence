@@ -52,7 +52,7 @@ pip install -r requirements.txt
 python -m streamlit run app.py
 ```
 
-The processed data is included, so the app starts straight away. To rebuild it from the raw files (about a minute), run `python scripts/01_prepare_data.py`. To study a different ward, change `STUDY_WARD` in `src/config.py` (for example `"M - East"`) and run that script again.
+The processed data is included, so the app starts straight away with only the small `requirements.txt`. To rebuild the data from the raw files (about a minute), run the tests, or redraw the figure, install the extra libraries with `pip install -r requirements-dev.txt` and then run `python scripts/01_prepare_data.py`. To study a different ward, change `STUDY_WARD` in `src/config.py` (for example `"M - East"`) and run that script again.
 
 ## Data
 

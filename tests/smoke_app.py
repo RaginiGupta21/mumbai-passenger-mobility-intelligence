@@ -15,12 +15,11 @@ def check(name, at):
 
 
 at = AppTest.from_file(APP, default_timeout=120); at.run(); check("Service gap map opens", at)
-assert len(at.dataframe) >= 1 and len(at.selectbox) >= 1
+assert len(at.selectbox) >= 1
 for label in list(at.selectbox(key="measure").options):
     at.selectbox(key="measure").set_value(label).run(); check(f"  map coloured by: {label}", at)
 at.checkbox(key="show_stops").set_value(True).run(); check("  show bus stops", at)
 at.checkbox(key="show_heat").set_value(True).run(); check("  show residents without a stop", at)
 at.radio(key="page").set_value("Where to fix it").run(); check("Where to fix it opens", at)
-assert len(at.dataframe) >= 1
 print("\nRESULT:", "ALL PASSED" if not fails else f"{fails} FAILURES")
 sys.exit(1 if fails else 0)

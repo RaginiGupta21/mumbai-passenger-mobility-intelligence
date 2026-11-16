@@ -1,0 +1,8 @@
+# Everything: run the app + rebuild the data (scripts/) + run the tests + redraw the figure
+-r requirements.txt
+scipy>=1.11
+geopandas>=1.0
+shapely>=2.0
+pyproj>=3.6
+pytest>=8.0
+matplotlib>=3.8

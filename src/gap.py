@@ -50,17 +50,23 @@ def ward_view(d):
     return [(min(lats) + max(lats)) / 2, (min(lons) + max(lons)) / 2], zoom
 
 
-MEASURES = {   # label -> (column, tooltip format, higher means worse?)
-    "Underserved share of residents": ("underserved_share", "{:.0%}", True),
-    "Residents with no stop within 500 m": ("no_stop_pop", "{:,.0f}", True),
-    "Residents with a stop but low frequency": ("low_freq_pop", "{:,.0f}", True),
-    "Peak-hour bus trips (supply)": ("peak_trips_h", "{:.0f} per hour", False),
-    "Residents (demand)": ("pop", "{:,.0f}", True),
+MEASURES = {   # label -> (column, tooltip format, is a higher value worse?, what the colours mean)
+    "Underserved share of residents": ("underserved_share", "{:.0%}", True, "Darker = a larger share of residents underserved."),
+    "Residents with no stop within 500 m": ("no_stop_pop", "{:,.0f}", True, "Darker = more residents with no bus stop within 500 m."),
+    "Residents with a stop but low frequency": ("low_freq_pop", "{:,.0f}", True, "Darker = more residents who have a stop nearby but few buses."),
+    "Peak-hour bus trips (supply)": ("peak_trips_h", "{:.0f} per hour", False, "Darker = FEWER bus trips per peak hour (a bigger supply gap)."),
+    "Residents (demand)": ("pop", "{:,.0f}", True, "Darker = more residents. This shows where people live, not where service is missing."),
 }
 
 
+def colour_for(label, v, lo, hi):
+    """Colour of one area. Darker always means 'more of a gap'; for supply measures (more is better) the scale is flipped."""
+    worse_when_high = MEASURES[label][2]
+    return ramp(v, lo, hi) if worse_when_high else ramp(v, hi, lo)
+
+
 def choropleth(m, d, label, ward_only=True):
-    col, fmt, _ = MEASURES[label]
+    col, fmt, _, _ = MEASURES[label]
     df = d["pr"].set_index("prabhag")
     shown = df[df.admin_ward == STUDY_WARD] if ward_only else df
     vmin, vmax = float(shown[col].min()), float(shown[col].max())
@@ -73,7 +79,7 @@ def choropleth(m, d, label, ward_only=True):
                  underserved=f"{p['underserved_pop']:,.0f} ({p['underserved_share']:.0%})", v=float(p[col]))
         feats.append({"type": "Feature", "geometry": f["geometry"], "properties": q})
     folium.GeoJson({"type": "FeatureCollection", "features": feats},
-                   style_function=lambda f: dict(fillColor=ramp(f["properties"]["v"], vmin, vmax), color="#FFFFFF", weight=1, fillOpacity=.78),
+                   style_function=lambda f: dict(fillColor=colour_for(label, f["properties"]["v"], vmin, vmax), color="#FFFFFF", weight=1, fillOpacity=.78),
                    highlight_function=lambda f: dict(weight=3, color="#2F3E46"),
                    tooltip=folium.GeoJsonTooltip(fields=["label", "residents", "value", "underserved"], aliases=["", "Residents", label, "Underserved"], sticky=True)).add_to(m)
     return vmin, vmax
@@ -95,6 +101,10 @@ def recommendations(d) -> list:
     top_no_stop = dense_pr.sort_values("no_stop_pop", ascending=False).head(3)
     top_low = s.sort_values("low_freq_pop", ascending=False).head(3)
     by_site = sites.groupby("prabhag").newly_covered.sum().sort_values(ascending=False).head(3)
+    if sites.empty:
+        return [f"Every resident of the {ward_label()} already has a bus stop within {NEAR_M} m, so no new stop areas are suggested.",
+                (f"{ward.low_freq_pop:,.0f} residents have a stop nearby but fewer than {LOW_FREQ} scheduled trips per peak hour; more frequent service there would help most."
+                 if ward.low_freq_pop > 0 else f"Service is also adequate: no resident has a stop nearby with fewer than {LOW_FREQ} scheduled trips per peak hour.")]
     dense = sites[sites.area_type == "dense residential"]; thin = sites[sites.area_type != "dense residential"]
     first = (f"Add stops in the {len(sites)} suggested areas. Together they would bring about {sites.cumulative_covered.iloc[-1]:,.0f} residents within {NEAR_M} m of a stop "
              f"({sites.cumulative_share_of_no_stop.iloc[-1]:.0%} of those currently without one). {len(dense)} of the {len(sites)} sites are in dense residential prabhags "

@@ -122,22 +122,23 @@ wd["is_study_ward"] = wd.admin_ward == STUDY_WARD
 ll = gpd.GeoSeries(gpd.points_from_xy(cells.x, cells.y), crs=CRS_UTM).to_crs("EPSG:4326")
 cells["lat"], cells["lon"] = ll.y.values, ll.x.values
 u = cells[(cells.admin_ward == STUDY_WARD) & cells.no_stop & (cells["pop"] > 0)].reset_index(drop=True)
-ut = cKDTree(u[["x", "y"]].to_numpy())
-adj = ut.sparse_distance_matrix(ut, NEAR_M, output_type="coo_matrix").tocsr()
-adj.data[:] = 1.0
-adj = adj + sparse.eye(len(u), format="csr"); adj.data[:] = 1.0
 remaining = u["pop"].to_numpy().copy(); sites = []
-for rank in range(1, N_NEW_STOPS + 1):
-    gain = adj @ remaining
-    j = int(np.argmax(gain))
-    if gain[j] <= 0:
-        break
-    sites.append({"rank": rank, "lat": float(u.lat[j]), "lon": float(u.lon[j]), "prabhag": int(u.prabhag[j]),
-                  "newly_covered": float(gain[j])})
-    remaining[adj[j].indices] = 0
-sites = pd.DataFrame(sites)
+if len(u) > 0:                      # nothing to suggest if every resident already has a stop nearby
+    ut = cKDTree(u[["x", "y"]].to_numpy())
+    adj = ut.sparse_distance_matrix(ut, NEAR_M, output_type="coo_matrix").tocsr()
+    adj.data[:] = 1.0
+    adj = adj + sparse.eye(len(u), format="csr"); adj.data[:] = 1.0
+    for rank in range(1, N_NEW_STOPS + 1):
+        gain = adj @ remaining
+        j = int(np.argmax(gain))
+        if gain[j] <= 0:
+            break
+        sites.append({"rank": rank, "lat": float(u.lat[j]), "lon": float(u.lon[j]), "prabhag": int(u.prabhag[j]),
+                      "newly_covered": float(gain[j])})
+        remaining[adj[j].indices] = 0
+sites = pd.DataFrame(sites, columns=["rank", "lat", "lon", "prabhag", "newly_covered"])
 sites["cumulative_covered"] = sites.newly_covered.cumsum()
-sites["cumulative_share_of_no_stop"] = sites.cumulative_covered / u["pop"].sum()
+sites["cumulative_share_of_no_stop"] = sites.cumulative_covered / max(u["pop"].sum(), 1)
 sites = sites.merge(pr[["prabhag", "density_km2", "area_type"]], on="prabhag", how="left")   # flag sites in low-density prabhags
 
 # ------------------------------------------------------------------ write outputs
@@ -161,6 +162,9 @@ print(json.dumps(quality, indent=1))
 print(f"\nGreater Mumbai: {city['underserved'] / city['residents']:.1%} of residents underserved")
 print(f"{STUDY_WARD}: {s['pop']:,.0f} residents, {s.underserved_pop:,.0f} underserved ({s.underserved_share:.1%}); "
       f"no stop {s.no_stop_pop:,.0f}, low frequency {s.low_freq_pop:,.0f}")
-print(f"{len(sites)} new stop areas would cover {sites.cumulative_covered.iloc[-1]:,.0f} residents "
-      f"({sites.cumulative_share_of_no_stop.iloc[-1]:.1%} of those with no stop)")
+if len(sites):
+    print(f"{len(sites)} new stop areas would cover {sites.cumulative_covered.iloc[-1]:,.0f} residents "
+          f"({sites.cumulative_share_of_no_stop.iloc[-1]:.1%} of those with no stop)")
+else:
+    print("Every resident of the study ward already has a stop within reach, so no new stop areas are suggested.")
 print("files:", sorted(p.name for p in PROC.iterdir()))
