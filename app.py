@@ -64,12 +64,11 @@ if page == "Service gap map":
     measure = c[0].selectbox("Colour the map by", list(gap.MEASURES), key="measure")
     show_stops = c[1].checkbox("Show bus stops", value=False, key="show_stops")
     show_heat = c[2].checkbox("Show residents without a stop", value=False, key="show_heat")
-    m = gap.base_map(); gap.choropleth(m, d, measure)
+    m = gap.base_map(*gap.ward_view(d)); gap.choropleth(m, d, measure)
     if show_stops: gap.stops_layer(m, d)
     if show_heat:
         u = d["cells"][d["cells"].no_stop]
         HeatMap(u[["lat", "lon", "pop"]].values.tolist(), radius=14, blur=18, min_opacity=.25, gradient={0.3: "#E3B88C", 0.6: "#C9856B", 1: "#8F4A45"}).add_to(m)
-    gap.fit_to(m, d)
     st_folium(m, height=540, use_container_width=True, returned_objects=[], key="gapmap")
     st.caption(f"{measure}. Hover over an area for details. Source: GTFS timetable and Census 2011.")
 
@@ -100,7 +99,7 @@ else:
     st.write("")
     L, R = st.columns([1.15, 1])
     with L:
-        m = gap.base_map()
+        m = gap.base_map(*gap.ward_view(d))
         folium.GeoJson({"type": "FeatureCollection", "features": [f for f in d["geo"]["features"] if f["properties"]["admin_ward"] == STUDY_WARD]},
                        style_function=lambda f: dict(fillColor="#EFE6D8", color="#FFFFFF", weight=1, fillOpacity=.7)).add_to(m)
         u = d["cells"][d["cells"].no_stop]
@@ -111,7 +110,6 @@ else:
             folium.Circle((r.lat, r.lon), radius=NEAR_M, color=col, weight=1.5, fill=True, fill_opacity=.12).add_to(m)
             folium.Marker((r.lat, r.lon), icon=folium.DivIcon(html=f'<div style="background:{col};color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:11px;border:2px solid #fff">{r.rank}</div>'),
                           tooltip=f"#{r.rank}: about {r.newly_covered:,.0f} more residents covered (prabhag {r.prabhag})").add_to(m)
-        gap.fit_to(m, d)
         st_folium(m, height=500, use_container_width=True, returned_objects=[], key="sitemap")
         st.caption("Numbered circles = suggested new stop areas (500 m reach). Teal = dense residential prabhag; orange = lower-density prabhag (check on the ground). Brown glow = residents with no stop nearby. Dark dots = existing stops.")
     with R:

@@ -4,8 +4,8 @@ import folium
 import pandas as pd
 from .config import *
 
-TILES = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"   # free CARTO light basemap
-ATTR = "© OpenStreetMap contributors © CARTO"
+TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"   # standard OpenStreetMap map tiles: free and no API key needed
+ATTR = "© OpenStreetMap contributors"
 COLORS = ("#EFE6D8", "#E3B88C", "#C9856B", "#9C5A55", "#6B3F46")           # soft light-to-dark scale (more gap = darker)
 
 
@@ -28,16 +28,26 @@ def ramp(v, vmin, vmax, colors=COLORS) -> str:
 
 def base_map(center=None, zoom=12):
     m = folium.Map(location=center or [19.07, 72.88], zoom_start=zoom, tiles=None, control_scale=True)
-    folium.TileLayer(tiles=TILES, attr=ATTR, subdomains="abcd", max_zoom=19, name="Basemap").add_to(m)
+    folium.TileLayer(tiles=TILES, attr=ATTR, max_zoom=19, name="Basemap").add_to(m)
     return m
 
 
-def fit_to(m, d, ward_only=True):
-    pts = [c for f in d["geo"]["features"] if (f["properties"]["admin_ward"] == STUDY_WARD or not ward_only)
-           for ring in (f["geometry"]["coordinates"] if f["geometry"]["type"] == "Polygon" else [r for p in f["geometry"]["coordinates"] for r in p])
-           for c in (ring if isinstance(ring[0][0], float) else [q for r in ring for q in r])]
-    la = [p[1] for p in pts]; lo = [p[0] for p in pts]
-    m.fit_bounds([[min(la), min(lo)], [max(la), max(lo)]], padding=(15, 15))
+def ward_view(d):
+    """Centre and zoom level that show the whole study ward (more reliable than fit_bounds inside Streamlit)."""
+    lons, lats = [], []
+
+    def walk(c):
+        if isinstance(c[0], (int, float)):
+            lons.append(c[0]); lats.append(c[1])
+        else:
+            for x in c:
+                walk(x)
+    for f in d["geo"]["features"]:
+        if f["properties"]["admin_ward"] == STUDY_WARD:
+            walk(f["geometry"]["coordinates"])
+    span = max(max(lons) - min(lons), (max(lats) - min(lats)) * 1.6)
+    zoom = 11 if span > 0.2 else 12 if span > 0.09 else 13
+    return [(min(lats) + max(lats)) / 2, (min(lons) + max(lons)) / 2], zoom
 
 
 MEASURES = {   # label -> (column, tooltip format, higher means worse?)

@@ -1,6 +1,6 @@
 # Public Transport Demand and Service Gap Analysis: P-North Ward, Mumbai
 
-[WRITE 2 SENTENCES IN YOUR OWN WORDS: why you chose this area and this topic. Mention anything personal, such as a route you take or something you noticed.]
+Mumbai's buses carry millions of trips a day, but bus service is not spread evenly across the city. Some areas have a stop on almost every street, while in others thousands of people live far from any stop. This project asks a simple question: in one residential ward, where do the most people have the least bus service?
 
 This project looks at where residents of one Mumbai ward have too little bus service for the number of people who live there. It uses the published bus timetable and Census 2011 population. It does not use made-up data, live bus positions or passenger counts.
 
@@ -87,13 +87,17 @@ docs/METHOD.md              the method in more detail
 - Population is from 2011 and the timetable is from 2026.
 - The suggested stop areas are starting points for planners, not final locations.
 
-## What I learned
+## What the project showed
 
-[WRITE THIS YOURSELF, 4 to 6 sentences: what was hard, what you did not understand at first, what surprised you in the data, and what you would do differently.]
+- **Coverage is not the whole story.** A stop nearby does not help much if only a few buses use it. That is why the gap has two parts: no stop nearby, and a stop with too few buses.
+- **Counting needs care.** My first version counted a bus once for every stop it passed near a home, which made service look much better than it was. Counting each trip once fixed that.
+- **Averages hide the picture.** Across the whole ward, about 27% of residents are underserved, but in prabhags 32, 38, 40, 48 and 49 it is half or more.
+- **Assumptions matter.** Spreading residents evenly is reasonable in dense areas but weak in large, sparsely built-up ones, so some results are less certain. The app marks them.
+- **Real data has problems.** The timetable has mostly estimated stop times and many routes with no trips. Checking this first stopped me from trusting it blindly.
 
 ## How this was built
 
-[EDIT THIS TO BE TRUE. For example: "I chose the topic and the study area and decided how to define a service gap. I used an AI assistant (Claude) to help write and debug the code, and I [ran and tested it / read through the code / wrote the findings myself]." Follow your course's rules on AI use.]
+The topic, Public Transport Demand and Service Gap Analysis, is mine, and my teacher advised me to name a specific area for it. I used an AI assistant (Claude) to build the data script, the app and the tests, and to suggest the study area and the two main questions. I ran the app on my own computer, and I am studying the code so that I can explain it and change it.
 
 ## Branches
 
@@ -101,4 +105,4 @@ docs/METHOD.md              the method in more detail
 
 ## Credits
 
-Contains data from DataMeet Trust (CC BY-SA 2.5 India) and croyla/mumbai-gtfs (MIT). Code released under the MIT License (see `LICENSE`).
+Contains data from DataMeet Trust (CC BY-SA 2.5 India) and croyla/mumbai-gtfs (MIT). Map tiles are © OpenStreetMap contributors. Code is released under the MIT License (see `LICENSE`).

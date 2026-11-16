@@ -85,3 +85,9 @@ def test_sites_in_low_density_prabhags_are_flagged(d):
     low = s.area_type != "dense residential"
     pr = d["pr"].set_index("prabhag")
     assert (pr.loc[s[low].prabhag, "density_km2"] < 5000).all() and (pr.loc[s[~low].prabhag, "density_km2"] >= 5000).all()
+
+
+def test_map_uses_a_basemap_that_needs_no_api_key_and_views_the_ward(d):
+    assert "cartocdn" not in gap.TILES and "openstreetmap" in gap.TILES
+    centre, zoom = gap.ward_view(d)
+    assert 18.8 < centre[0] < 19.4 and 72.7 < centre[1] < 73.1 and zoom in (11, 12, 13)
