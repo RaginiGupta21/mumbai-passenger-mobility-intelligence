@@ -1,7 +1,11 @@
 # Public Transport Demand and Service Gap Analysis: P-North Ward, Mumbai
 
-**Live demo: https://mumbai-passenger-mobility-intelligence.streamlit.app/**
+---
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mumbai-passenger-mobility-intelligence.streamlit.app/)
 
+**Live demo: [mumbai-passenger-mobility-intelligence.streamlit.ap](https://mumbai-passenger-mobility-intelligence.streamlit.app/)**
+
+> Runs on Streamlit Community Cloud. Free apps sleep after inactivity, so if you see a "wake up" button, click it and wait a few seconds.
 Mumbai's buses carry millions of trips a day, but bus service is not spread evenly across the city. Some areas have a stop on almost every street, while in others thousands of people live far from any stop. This project asks a simple question: in one residential ward, where do the most people have the least bus service?
 
 This project looks at where residents of one Mumbai ward have too little bus service for the number of people who live there. It uses the published bus timetable and Census 2011 population. It does not use made-up data, live bus positions or passenger counts.
