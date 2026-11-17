@@ -150,6 +150,9 @@ cells[cells.admin_ward == STUDY_WARD][["lat", "lon", "pop", "prabhag", "dist_nea
 sw = gpd.GeoSeries(gpd.points_from_xy(stops.x, stops.y), crs=CRS_UTM)
 keep = sw.within(wards.union_all().buffer(NEAR_M)).values
 stops.loc[keep, ["stop_id", "stop_name", "stop_lat", "stop_lon", "peak_trips_h"]].to_parquet(PROC / "stops.parquet", index=False)
+cells[["lat", "lon", "pop", "prabhag", "admin_ward", "dist_nearest_m", "trips_peak_h", "no_stop", "low_freq"]] \
+    .astype({"lat": "float32", "lon": "float32", "pop": "float32", "prabhag": "int16", "dist_nearest_m": "float32", "trips_peak_h": "float32", "admin_ward": "category"}) \
+    .to_parquet(PROC / "cells.parquet", index=False)      # whole city: lets the app look up the service at any searched address
 sites.to_parquet(PROC / "new_stop_sites.parquet", index=False)
 
 city = {"residents": float(pr["pop"].sum()), "underserved": float(pr.underserved_pop.sum()), "no_stop": float(pr.no_stop_pop.sum()), "low_freq": float(pr.low_freq_pop.sum())}

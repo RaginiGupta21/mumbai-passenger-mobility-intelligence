@@ -8,7 +8,7 @@ from folium.plugins import HeatMap
 from streamlit_folium import st_folium
 
 from src.config import *
-from src import gap
+from src import gap, search
 
 st.set_page_config(page_title="Public Transport Demand and Service Gap Analysis", layout="wide")
 st.markdown("""<style>
@@ -26,6 +26,40 @@ def get_data():
 
 def kpi(col, label, value, sub=""):
     col.markdown(f'<div class="kpi"><div class="l">{label}</div><div class="v">{value}</div><div class="s">{sub}</div></div>', unsafe_allow_html=True)
+
+
+def search_ui(d):
+    """A search box above the map. Returns (pin, info): the chosen place and the bus service there (or None, None)."""
+    with st.form("search_form"):
+        c = st.columns([5, 1])
+        q = c[0].text_input("Find an address or place", key="q", label_visibility="collapsed",
+                            placeholder="Find an address or place, e.g. Malad station, Orlem church, or coordinates like 19.18, 72.84")
+        go = c[1].form_submit_button("Find", width="stretch")
+    if go:
+        cands, msg = search.find(q, d["stops"])
+        st.session_state["cands"], st.session_state["search_msg"] = cands, msg
+        st.session_state.pop("cand", None)
+    cands = st.session_state.get("cands", [])
+    if st.session_state.get("search_msg"):
+        (st.warning if not cands else st.info)(st.session_state["search_msg"])
+    if not cands:
+        return None, None
+    i = 0
+    if len(cands) > 1:
+        i = st.selectbox("Matches", range(len(cands)), format_func=lambda k, c=cands: c[k]["label"], key="cand")
+    pin = cands[i]
+    info = search.service_at(d, pin["lat"], pin["lon"])
+    if info is None:
+        st.warning("That place is outside the mapped Greater Mumbai area, so there is no service information for it.")
+        return pin, None
+    k = st.columns(4)
+    kpi(k[0], "Area", f"Prabhag {info['prabhag']}", f"{info['admin_ward']} ward")
+    kpi(k[1], "Nearest bus stop", f"{info['nearest_stop_m']:.0f} m", info["nearest_stop"])
+    kpi(k[2], "Peak bus trips nearby", f"{info['trips_peak_h']:.0f} per hour", f"within {NEAR_M} m, 08:00 to 10:00")
+    kpi(k[3], "Verdict", info["status"], "estimate from a 100 m grid")
+    if st.button("Clear search"):
+        st.session_state.pop("cands", None); st.session_state.pop("search_msg", None); st.rerun()
+    return pin, info
 
 
 d = get_data()
@@ -60,12 +94,18 @@ if page == "Service gap map":
     kpi(k[2], f"No stop within {NEAR_M} m", f"{sw.no_stop_pop:,.0f}", f"{sw.no_stop_share:.1%} of residents")
     kpi(k[3], "Stop nearby, low frequency", f"{sw.low_freq_pop:,.0f}", f"fewer than {LOW_FREQ} trips per peak hour")
     st.write("")
+    pin, info = search_ui(d)
+    st.write("")
     c = st.columns([2, 1, 1])
     measure = c[0].selectbox("Colour the map by", list(gap.MEASURES), key="measure")
     show_stops = c[1].checkbox("Show bus stops", value=False, key="show_stops")
     show_heat = c[2].checkbox("Show residents without a stop", value=False, key="show_heat")
-    m = gap.base_map(*gap.ward_view(d)); gap.choropleth(m, d, measure)
-    if show_stops: gap.stops_layer(m, d)
+    centre, zoom = gap.ward_view(d)
+    other_ward = bool(info) and info["admin_ward"] != STUDY_WARD            # searched place is outside the study ward: show the whole city
+    if pin: centre, zoom = [pin["lat"], pin["lon"]], 16
+    m = gap.base_map(centre, zoom); gap.choropleth(m, d, measure, ward_only=not other_ward)
+    if pin: gap.add_pin(m, pin, info)
+    if show_stops or pin: gap.stops_layer(m, d)
     u = d["cells"][d["cells"].no_stop]
     if show_heat and len(u):
         HeatMap(u[["lat", "lon", "pop"]].values.tolist(), radius=14, blur=18, min_opacity=.25, gradient={0.3: "#E3B88C", 0.6: "#C9856B", 1: "#8F4A45"}).add_to(m)
@@ -90,6 +130,7 @@ if page == "Service gap map":
 else:
     st.title(f"Where to fix it: {label}")
     st.markdown("Which areas should come first, and where would a new stop help the most residents?")
+    pin, info = search_ui(d)
     sites = d["sites"]
     if sites.empty:
         st.success(f"Every resident of the {label} already has a bus stop within {NEAR_M} m, so no new stop areas are needed.")
@@ -109,7 +150,9 @@ else:
     st.write("")
     L, R = st.columns([1.15, 1])
     with L:
-        m = gap.base_map(*gap.ward_view(d))
+        centre, zoom = gap.ward_view(d)
+        if pin: centre, zoom = [pin["lat"], pin["lon"]], 16
+        m = gap.base_map(centre, zoom)
         folium.GeoJson({"type": "FeatureCollection", "features": [f for f in d["geo"]["features"] if f["properties"]["admin_ward"] == STUDY_WARD]},
                        style_function=lambda f: dict(fillColor="#EFE6D8", color="#FFFFFF", weight=1, fillOpacity=.7)).add_to(m)
         u = d["cells"][d["cells"].no_stop]
@@ -120,6 +163,7 @@ else:
             folium.Circle((r.lat, r.lon), radius=NEAR_M, color=col, weight=1.5, fill=True, fill_opacity=.12).add_to(m)
             folium.Marker((r.lat, r.lon), icon=folium.DivIcon(html=f'<div style="background:{col};color:#fff;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:11px;border:2px solid #fff">{r.rank}</div>'),
                           tooltip=f"#{r.rank}: about {r.newly_covered:,.0f} more residents covered (prabhag {r.prabhag})").add_to(m)
+        if pin: gap.add_pin(m, pin, info)
         st_folium(m, height=500, use_container_width=True, returned_objects=[], key="sitemap")
         st.caption("Numbered circles = suggested new stop areas (500 m reach). Teal = dense residential prabhag; orange = lower-density prabhag (check on the ground). Brown glow = residents with no stop nearby. Dark dots = existing stops.")
     with R:

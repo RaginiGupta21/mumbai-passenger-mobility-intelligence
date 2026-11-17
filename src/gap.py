@@ -11,7 +11,7 @@ COLORS = ("#EFE6D8", "#E3B88C", "#C9856B", "#9C5A55", "#6B3F46")           # sof
 
 def load_data() -> dict:
     d = {"sites": pd.read_parquet(PROC / "new_stop_sites.parquet"), "wards": pd.read_parquet(PROC / "ward_summary.parquet"),
-         "cells": pd.read_parquet(PROC / "study_cells.parquet"), "stops": pd.read_parquet(PROC / "stops.parquet"),
+         "cells": pd.read_parquet(PROC / "study_cells.parquet"), "stops": pd.read_parquet(PROC / "stops.parquet"), "all_cells": pd.read_parquet(PROC / "cells.parquet"),
          "meta": json.load(open(PROC / "data_quality.json"))}
     geo = json.load(open(PROC / "prabhags.geojson"))
     d["geo"] = geo
@@ -118,3 +118,12 @@ def recommendations(d) -> list:
         f"have the most residents in that situation. In the whole ward {ward.low_freq_pop:,.0f} residents are affected.",
         "Treat these as starting points for planners, not final decisions: they ignore roads, land use and real passenger counts (see 'How this was calculated, and its limits' at the top of the page).",
     ]
+
+
+def add_pin(m, pin, info):
+    """Marker for a searched place, its 500 m reach, and a dashed line to the nearest bus stop."""
+    folium.Circle((pin["lat"], pin["lon"]), radius=NEAR_M, color="#3F7C85", weight=1.5, fill=True, fill_opacity=.08).add_to(m)
+    if info:
+        folium.PolyLine([(pin["lat"], pin["lon"]), (info["nearest_stop_lat"], info["nearest_stop_lon"])], color="#2F4F63", weight=2, dash_array="5 6",
+                        tooltip=f"Nearest stop: {info['nearest_stop']} ({info['nearest_stop_m']:.0f} m)").add_to(m)
+    folium.Marker((pin["lat"], pin["lon"]), icon=folium.Icon(color="red", icon="map-marker", prefix="fa"), tooltip=pin["label"]).add_to(m)
