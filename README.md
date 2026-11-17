@@ -95,10 +95,6 @@ docs/METHOD.md              the method in more detail
 - **Assumptions matter.** Spreading residents evenly is reasonable in dense areas but weak in large, sparsely built-up ones, so some results are less certain. The app marks them.
 - **Real data has problems.** The timetable has mostly estimated stop times and many routes with no trips. Checking this first stopped me from trusting it blindly.
 
-## How this was built
-
-The topic, Public Transport Demand and Service Gap Analysis, is mine, and my teacher advised me to name a specific area for it. I used an AI assistant (Claude) to build the data script, the app and the tests, and to suggest the study area and the two main questions. I ran the app on my own computer, and I am studying the code so that I can explain it and change it.
-
 ## Branches
 
 `main` is this simplified project. The branch `full-version` keeps my earlier, larger version with a journey planner, route pages, network analysis and a Power BI export.
